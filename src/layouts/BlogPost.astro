@@ -1,0 +1,175 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { ArrowLeft, Share2, Twitter, Linkedin, Facebook } from 'lucide-astro';
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { title, description, pubDate, updatedDate, heroImage, tags } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+	<div class="post-glow"></div>
+	<article class="post-content">
+		<div class="top-meta">
+			<a href="/blog" class="back-btn"><ArrowLeft size={16} /> Back to Archive</a>
+			<div class="date-tags">
+				<FormattedDate date={pubDate} />
+				{tags && tags.length > 0 && (
+					<span class="tags">
+						{tags.map(tag => (
+							<a href={`/categories/${tag.toLowerCase().replace(' ', '-')}`} class="tag">#{tag}</a>
+						))}
+					</span>
+				)}
+			</div>
+		</div>
+
+		<h1 class="post-title" transition:name={`title-${title}`}>{title}</h1>
+		<p class="post-description">{description}</p>
+
+		{heroImage && (
+			<div class="hero-image">
+				<img src={heroImage} alt="" transition:name={`hero-${heroImage}`} />
+			</div>
+		)}
+
+		<div class="prose">
+			<slot />
+		</div>
+
+		<footer class="post-footer">
+			<div class="share-box">
+				<p>Found this useful? Share it with your network</p>
+				<div class="share-links">
+					<a href="#" aria-label="Share on X"><Twitter size={20} /></a>
+					<a href="#" aria-label="Share on LinkedIn"><Linkedin size={20} /></a>
+					<a href="#" aria-label="Share on Facebook"><Facebook size={20} /></a>
+					<button class="copy-link" aria-label="Copy Link" id="copy-btn"><Share2 size={20} /></button>
+				</div>
+			</div>
+		</footer>
+	</article>
+
+    <script>
+        const copyBtn = document.getElementById('copy-btn');
+        copyBtn?.addEventListener('click', () => {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copied to clipboard!');
+        });
+    </script>
+</BaseLayout>
+
+<style>
+	.post-glow {
+		position: fixed;
+		top: -10%;
+		right: -10%;
+		width: 50%;
+		height: 50%;
+		background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+		filter: blur(100px);
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	article {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 40px 0;
+	}
+
+	.top-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40px;
+	}
+
+	.back-btn {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.9rem;
+		color: var(--text-muted);
+	}
+
+	.date-tags {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		font-size: 0.9rem;
+		color: var(--text-muted);
+	}
+
+	.tags {
+		display: flex;
+		gap: 8px;
+	}
+
+	.tag {
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.post-title {
+		font-size: 3.5rem;
+		margin-bottom: 2rem;
+		line-height: 1.1;
+	}
+
+	.post-description {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		margin-bottom: 3rem;
+		line-height: 1.6;
+	}
+
+	.hero-image {
+		margin-bottom: 4rem;
+	}
+
+	.hero-image img {
+		width: 100%;
+		max-height: 500px;
+		object-fit: cover;
+		border-radius: 24px;
+	}
+
+	.post-footer {
+		margin-top: 6rem;
+		padding-top: 3rem;
+		border-top: 1px solid var(--border);
+	}
+
+	.share-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+	}
+
+	.share-links {
+		display: flex;
+		gap: 20px;
+	}
+
+	.share-links a, .copy-link {
+		color: var(--text-muted);
+		transition: color 0.2s ease;
+		background: none;
+		border: none;
+		cursor: pointer;
+	}
+
+	.share-links a:hover, .copy-link:hover {
+		color: var(--accent);
+	}
+
+	@media (max-width: 768px) {
+		.post-title { font-size: 2.5rem; }
+		.top-meta { flex-direction: column; align-items: flex-start; gap: 20px; }
+	}
+</style>

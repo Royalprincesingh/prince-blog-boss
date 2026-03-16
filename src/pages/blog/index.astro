@@ -1,0 +1,148 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { ArrowRight } from 'lucide-astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const title = "Blog Articles";
+const description = "Explore our latest articles, tutorials, and insights on web development.";
+---
+
+<BaseLayout title={title} description={description}>
+	<section class="blog-header">
+		<h1>The <span class="text-accent">Archive</span></h1>
+		<p>Discover my thoughts on programming, technology, and building for the web.</p>
+	</section>
+
+	<div class="posts-grid">
+		{posts.map((post) => (
+			<article class="post-card">
+				<a href={`/blog/${post.id.replace(/\.[^/.]+$/, "")}/`} class="card-link">
+					{post.data.heroImage && (
+						<div class="image-box">
+							<img src={post.data.heroImage} alt="" />
+						</div>
+					)}
+					<div class="content">
+						<div class="meta">
+							<FormattedDate date={post.data.pubDate} />
+							{post.data.tags && (
+								<span class="tag">{post.data.tags[0]}</span>
+							)}
+						</div>
+						<h3>{post.data.title}</h3>
+						<p>{post.data.description}</p>
+						<span class="read-link">Read Full Post <ArrowRight size={14} /></span>
+					</div>
+				</a>
+			</article>
+		))}
+	</div>
+</BaseLayout>
+
+<style>
+	.blog-header {
+		text-align: center;
+		margin-bottom: 80px;
+	}
+
+	.blog-header h1 {
+		margin-bottom: 1rem;
+	}
+
+	.text-accent {
+		color: var(--accent);
+	}
+
+	.posts-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+		gap: 32px;
+	}
+
+	.post-card {
+		background: var(--bg-card);
+		border: 1px solid var(--border);
+		border-radius: 24px;
+		overflow: hidden;
+		transition: all 0.3s ease;
+	}
+
+	.post-card:hover {
+		border-color: var(--accent);
+		transform: translateY(-4px);
+		background: var(--bg-hover);
+	}
+
+	.image-box {
+		width: 100%;
+		aspect-ratio: 16/9;
+		overflow: hidden;
+	}
+
+	.image-box img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.5s ease;
+	}
+
+	.post-card:hover .image-box img {
+		transform: scale(1.05);
+	}
+
+	.content {
+		padding: 32px;
+	}
+
+	.meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16px;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+	}
+
+	.tag {
+		color: var(--accent);
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.post-card h3 {
+		font-size: 1.5rem;
+		margin-bottom: 12px;
+		line-height: 1.3;
+	}
+
+	.post-card p {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+		margin-bottom: 24px;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.read-link {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.9rem;
+		font-weight: 700;
+		color: var(--accent);
+	}
+
+	@media (max-width: 768px) {
+		.posts-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -1,0 +1,223 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AUTHOR_EMAIL, GITHUB_URL, LINKEDIN_URL } from '../consts';
+import { Mail, Github, Linkedin, Send } from 'lucide-astro';
+
+const title = "Contact";
+const description = "Get in touch with Prince Singh for collaborations or queries.";
+---
+
+<BaseLayout title={title} description={description}>
+	<section class="contact-header">
+		<h1>Get in <span class="text-accent">Touch</span></h1>
+		<p>Have a question or want to work together? I'd love to hear from you.</p>
+	</section>
+
+	<div class="grid">
+		<div class="contact-info">
+			<h2>Contact Information</h2>
+			<div class="info-items">
+				<a href={`mailto:${AUTHOR_EMAIL}`} class="info-item">
+					<div class="icon-box"><Mail size={20} /></div>
+					<div>
+						<p class="label">Email Me</p>
+						<p class="value">{AUTHOR_EMAIL}</p>
+					</div>
+				</a>
+				<a href={GITHUB_URL} target="_blank" class="info-item">
+					<div class="icon-box"><Github size={20} /></div>
+					<div>
+						<p class="label">GitHub</p>
+						<p class="value">royalprincesingh</p>
+					</div>
+				</a>
+				<a href={LINKEDIN_URL} target="_blank" class="info-item">
+					<div class="icon-box"><Linkedin size={20} /></div>
+					<div>
+						<p class="label">LinkedIn</p>
+						<p class="value">Prince Singh</p>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		<form class="contact-form">
+			<div class="form-group">
+				<label for="name">Full Name</label>
+				<input type="text" id="name" placeholder="John Doe" />
+			</div>
+			<div class="form-group">
+				<label for="email">Email Address</label>
+				<input type="email" id="email" placeholder="john@example.com" />
+			</div>
+			<div class="form-group">
+				<label for="subject">Subject</label>
+				<input type="text" id="subject" placeholder="Project Inquiry" />
+			</div>
+			<div class="form-group">
+				<label for="message">Message</label>
+				<textarea id="message" rows="5" placeholder="Tell me more about..."></textarea>
+			</div>
+			<button type="submit" class="submit-btn" disabled>
+				Send Message <Send size={18} />
+			</button>
+			<p class="form-note">Note: Form is for demonstration only.</p>
+		</form>
+	</div>
+</BaseLayout>
+
+<style>
+	.contact-header {
+		text-align: center;
+		margin-bottom: 80px;
+	}
+
+	.contact-header h1 {
+		font-size: 4rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.text-accent {
+		background: var(--accent-gradient);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: 1fr 1.5fr;
+		gap: 80px;
+		max-width: 1100px;
+		margin: 0 auto;
+	}
+
+	.info-items {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		margin-top: 40px;
+	}
+
+	.info-item {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		padding: 24px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--border);
+		border-radius: 20px;
+		transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+	}
+
+	.info-item:hover {
+		border-color: var(--accent);
+		transform: translateX(12px);
+		background: rgba(139, 92, 246, 0.05);
+	}
+
+	.icon-box {
+		width: 56px;
+		height: 56px;
+		background: var(--accent-muted);
+		color: var(--accent);
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--text-muted);
+		margin-bottom: 4px;
+	}
+
+	.value {
+		font-weight: 600;
+		font-size: 1.1rem;
+	}
+
+	.contact-form {
+		background: rgba(255, 255, 255, 0.02);
+		padding: 60px;
+		border-radius: 40px;
+		border: 1px solid var(--border);
+		backdrop-filter: blur(20px);
+	}
+
+	.form-group {
+		margin-bottom: 32px;
+	}
+
+	label {
+		display: block;
+		font-size: 0.85rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: 12px;
+		color: var(--text-muted);
+	}
+
+	input, textarea {
+		width: 100%;
+		padding: 16px 20px;
+		background: rgba(0,0,0,0.5);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 1rem;
+		transition: all 0.3s ease;
+	}
+
+	input:focus, textarea:focus {
+		outline: none;
+		border-color: var(--accent);
+		background: rgba(0,0,0,0.8);
+		box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+	}
+
+	.submit-btn {
+		width: 100%;
+		padding: 20px;
+		background: var(--accent-gradient);
+		color: #fff;
+		border: none;
+		border-radius: 12px;
+		font-weight: 800;
+		font-size: 1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	.submit-btn:hover {
+		transform: scale(1.02);
+		filter: brightness(1.1);
+		box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+	}
+
+	.form-note {
+		text-align: center;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		margin-top: 24px;
+	}
+
+	@media (max-width: 900px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.contact-header h1 { font-size: 3rem; }
+		.contact-form { padding: 40px; }
+	}
+</style>

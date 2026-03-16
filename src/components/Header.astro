@@ -1,0 +1,109 @@
+---
+import { SITE_TITLE, GITHUB_URL, LINKEDIN_URL } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+import { Github, Linkedin, Menu } from 'lucide-astro';
+---
+
+<header class="glass">
+	<nav class="container">
+		<a href="/" class="logo">
+			BLOG-BOSS<span class="dot">.</span>
+		</a>
+		<div class="links">
+			<HeaderLink href="/">Home</HeaderLink>
+			<HeaderLink href="/blog">Blog</HeaderLink>
+			<HeaderLink href="/categories">Categories</HeaderLink>
+			<HeaderLink href="/about">About</HeaderLink>
+			<HeaderLink href="/contact">Contact</HeaderLink>
+		</div>
+		<div class="socials">
+			<a href={GITHUB_URL} target="_blank" aria-label="GitHub">
+				<Github size={20} />
+			</a>
+			<a href={LINKEDIN_URL} target="_blank" aria-label="LinkedIn">
+				<Linkedin size={20} />
+			</a>
+			<button class="menu-toggle" aria-label="Toggle Menu">
+				<Menu size={24} />
+			</button>
+		</div>
+	</nav>
+</header>
+
+<style>
+	header {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: rgba(10, 10, 10, 0.8);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 1rem 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.logo {
+		font-family: var(--font-title);
+		font-size: 1.5rem;
+		font-weight: 800;
+		letter-spacing: -0.05em;
+		color: #fff;
+	}
+
+	.dot {
+		color: var(--accent);
+	}
+
+	.links {
+		display: flex;
+		gap: 2rem;
+	}
+
+	.links a {
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--text-muted);
+	}
+
+	.links a:hover, .links a.active {
+		color: #fff;
+	}
+
+	.socials {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.socials a {
+		color: var(--text-muted);
+	}
+
+	.socials a:hover {
+		color: var(--accent);
+	}
+
+	.menu-toggle {
+		display: none;
+		background: none;
+		border: none;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	@media (max-width: 768px) {
+		.links {
+			display: none;
+		}
+		.menu-toggle {
+			display: block;
+		}
+	}
+</style>

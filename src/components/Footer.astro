@@ -1,0 +1,140 @@
+---
+import { SITE_TITLE, AUTHOR_NAME, GITHUB_URL, LINKEDIN_URL } from '../consts';
+import { Github, Linkedin, Twitter, Mail } from 'lucide-astro';
+
+const today = new Date();
+---
+
+<footer class="footer">
+	<div class="container">
+		<div class="footer-top">
+			<div class="brand">
+				<a href="/" class="logo">
+					BLOG-BOSS<span class="dot">.</span>
+				</a>
+				<p>Sharing knowledge on modern web development and AI tools.</p>
+			</div>
+			
+			<div class="footer-nav">
+				<h4>Links</h4>
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="/blog">Blog</a></li>
+					<li><a href="/categories">Categories</a></li>
+					<li><a href="/about">About</a></li>
+					<li><a href="/contact">Contact</a></li>
+				</ul>
+			</div>
+
+			<div class="footer-social">
+				<h4>Connect</h4>
+				<div class="social-links">
+					<a href={GITHUB_URL} target="_blank" aria-label="GitHub"><Github size={20} /></a>
+					<a href={LINKEDIN_URL} target="_blank" aria-label="LinkedIn"><Linkedin size={20} /></a>
+					<a href="#" target="_blank" aria-label="Twitter"><Twitter size={20} /></a>
+					<a href="/contact" aria-label="Email"><Mail size={20} /></a>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer-bottom">
+			<p>&copy; {today.getFullYear()} {AUTHOR_NAME}. All rights reserved.</p>
+			<p class="made-with">Crafted by <span class="text-accent">{AUTHOR_NAME}</span></p>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.footer {
+		background-color: var(--bg-card);
+		border-top: 1px solid var(--border);
+		padding: 80px 0 40px;
+		margin-top: auto;
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+	}
+
+	.footer-top {
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		gap: 60px;
+		margin-bottom: 60px;
+	}
+
+	.logo {
+		font-family: var(--font-title);
+		font-size: 1.5rem;
+		font-weight: 800;
+		color: #fff;
+		margin-bottom: 1rem;
+		display: block;
+	}
+
+	.dot {
+		color: var(--accent);
+	}
+
+	.brand p {
+		color: var(--text-muted);
+		max-width: 300px;
+		font-size: 0.95rem;
+	}
+
+	h4 {
+		font-size: 1rem;
+		margin-bottom: 1.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	ul {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	ul a {
+		color: var(--text-muted);
+		font-size: 0.95rem;
+	}
+
+	.social-links {
+		display: flex;
+		gap: 16px;
+	}
+
+	.social-links a {
+		color: var(--text-muted);
+	}
+
+	.footer-bottom {
+		border-top: 1px solid var(--border);
+		padding-top: 40px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: var(--text-muted);
+		font-size: 0.9rem;
+	}
+
+	.made-with a {
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	@media (max-width: 768px) {
+		.footer-top {
+			grid-template-columns: 1fr;
+			gap: 40px;
+		}
+		.footer-bottom {
+			flex-direction: column;
+			gap: 16px;
+			text-align: center;
+		}
+	}
+</style>

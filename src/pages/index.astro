@@ -1,0 +1,460 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import FormattedDate from '../components/FormattedDate.astro';
+import { ArrowRight, Search, Hash } from 'lucide-astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const featuredPost = posts[0];
+const recentPosts = posts.slice(1, 4);
+
+// Get unique tags from all posts
+const categories = [...new Set(posts.flatMap(p => p.data.tags || []))].slice(0, 4);
+
+const allPostsForSearch = posts.map(p => ({
+	id: p.id.replace(/\.[^/.]+$/, ""),
+	title: p.data.title,
+	description: p.data.description,
+	tags: p.data.tags || []
+}));
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<section class="hero">
+		<div class="hero-bg-accent"></div>
+		<div class="hero-content">
+			<span class="badge">Innovation in every pixel</span>
+			<h1>Insights on Modern <br /><span class="text-accent-gradient">Web Development</span></h1>
+			<p>Mastering the MERN stack, exploring cutting-edge AI tools, and architectural patterns.</p>
+			
+			<div class="search-bar">
+				<Search size={20} class="search-icon" />
+				<input type="text" id="post-search" placeholder="Search for articles..." />
+				<div id="search-results" class="search-results hidden"></div>
+			</div>
+		</div>
+	</section>
+
+	<script define:vars={{ allPosts: allPostsForSearch }}>
+		const searchInput = document.getElementById('post-search');
+		const searchResults = document.getElementById('search-results');
+
+		searchInput?.addEventListener('input', (e) => {
+			const query = e.target.value.toLowerCase();
+			if (!query) {
+				searchResults.classList.add('hidden');
+				return;
+			}
+
+			const matches = allPosts.filter(p => 
+				p.title.toLowerCase().includes(query) || 
+				p.description.toLowerCase().includes(query) ||
+				p.tags.some(t => t.toLowerCase().includes(query))
+			).slice(0, 5);
+
+			if (matches.length > 0) {
+				searchResults.innerHTML = matches.map(p => `
+					<a href="/blog/${p.id}/" class="search-item">
+						<span class="search-title">${p.title}</span>
+						<span class="search-desc">${p.description}</span>
+					</a>
+				`).join('');
+				searchResults.classList.remove('hidden');
+			} else {
+				searchResults.innerHTML = '<div class="no-results">No articles found</div>';
+				searchResults.classList.remove('hidden');
+			}
+		});
+
+		document.addEventListener('click', (e) => {
+			if (searchInput && !searchInput.contains(e.target) && searchResults && !searchResults.contains(e.target)) {
+				searchResults.classList.add('hidden');
+			}
+		});
+	</script>
+
+	{featuredPost && (
+		<section class="featured">
+			<h2 class="section-title"><span class="title-line"></span> Featured Post</h2>
+			<a href={`/blog/${featuredPost.id.replace(/\.[^/.]+$/, "")}/`} class="featured-card">
+				<div class="image-wrapper">
+					<img src={featuredPost.data.heroImage} alt="" transition:name={`hero-${featuredPost.id}`} />
+				</div>
+				<div class="content">
+					<div class="meta">
+						<FormattedDate date={featuredPost.data.pubDate} />
+						<span class="dot">·</span>
+						<span class="tag">TOP SELECTION</span>
+					</div>
+					<h3>{featuredPost.data.title}</h3>
+					<p>{featuredPost.data.description}</p>
+					<span class="read-more">Read Full Experience <ArrowRight size={16} /></span>
+				</div>
+			</a>
+		</section>
+	)}
+
+	<section class="recent-categories">
+		<div class="grid">
+			<div class="recent-list">
+				<div class="section-header">
+					<h2 class="section-title"><span class="title-line"></span> Latest Articles</h2>
+					<a href="/blog" class="view-all">See the Archive</a>
+				</div>
+				<div class="posts-list">
+					{recentPosts.map((post) => (
+						<article class="post-item">
+							<a href={`/blog/${post.id.replace(/\.[^/.]+$/, "")}/`}>
+								<div class="post-meta">
+									<FormattedDate date={post.data.pubDate} />
+								</div>
+								<h4>{post.data.title}</h4>
+								<div class="post-arrow"><ArrowRight size={18} /></div>
+							</a>
+						</article>
+					))}
+				</div>
+			</div>
+
+			<div class="categories-sidebar">
+				<h2 class="section-title"><span class="title-line"></span> Topics</h2>
+				<div class="category-list">
+					{categories.map((cat) => (
+						<a href={`/categories/${cat.toLowerCase().replace(' ', '-')}`} class="category-tag">
+							<Hash size={14} /> {cat}
+						</a>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero {
+		padding: 100px 0 140px;
+		text-align: center;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-bg-accent {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+		background-image: url('/assets/hero-bg.png');
+		background-size: cover;
+		background-position: center;
+		opacity: 0.15;
+		filter: blur(40px);
+		mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+		pointer-events: none;
+	}
+
+	.badge {
+		display: inline-block;
+		padding: 6px 16px;
+		background: var(--accent-muted);
+		color: var(--accent);
+		border-radius: 99px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		margin-bottom: 2rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		border: 1px solid var(--border);
+	}
+
+	.text-accent-gradient {
+		background: var(--accent-gradient);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.hero p {
+		color: var(--text-muted);
+		font-size: 1.25rem;
+		max-width: 650px;
+		margin: 0 auto 4rem;
+		line-height: 1.8;
+	}
+
+	.search-bar {
+		position: relative;
+		max-width: 550px;
+		margin: 0 auto;
+		filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+	}
+
+	.search-icon {
+		position: absolute;
+		left: 20px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--text-muted);
+		opacity: 0.5;
+	}
+
+	.search-bar input {
+		width: 100%;
+		padding: 20px 24px 20px 56px;
+		background: #0d0d0d;
+		border: 1px solid var(--border);
+		border-radius: 99px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 1.1rem;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.search-bar input:focus {
+		outline: none;
+		border-color: var(--accent);
+		background: #111;
+		box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+	}
+
+	.search-results {
+		position: absolute;
+		top: calc(100% + 12px);
+		left: 0;
+		right: 0;
+		background: #0d0d0d;
+		border: 1px solid var(--border);
+		border-radius: 24px;
+		z-index: 50;
+		box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+		text-align: left;
+		overflow: hidden;
+		backdrop-filter: blur(20px);
+	}
+
+	.search-item {
+		display: flex;
+		flex-direction: column;
+		padding: 20px;
+		border-bottom: 1px solid var(--border);
+		transition: all 0.2s ease;
+	}
+
+	.search-item:hover {
+		background: var(--bg-hover);
+		padding-left: 28px;
+	}
+
+	.search-title {
+		font-weight: 700;
+		color: #fff;
+		margin-bottom: 4px;
+	}
+
+	.search-desc {
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.section-title {
+		font-size: 1.25rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.15em;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 3rem;
+		color: var(--text-muted);
+	}
+
+	.title-line {
+		display: block;
+		width: 40px;
+		height: 2px;
+		background: var(--accent-gradient);
+	}
+
+	.featured {
+		margin-bottom: 120px;
+	}
+
+	.featured-card {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0;
+		background: #0d0d0d;
+		border-radius: 32px;
+		overflow: hidden;
+		border: 1px solid var(--border);
+		box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+		transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+	}
+
+	.featured-card:hover {
+		transform: translateY(-10px);
+		border-color: var(--accent);
+		box-shadow: 0 30px 60px rgba(139, 92, 246, 0.1);
+	}
+
+	.image-wrapper {
+		aspect-ratio: 1;
+		overflow: hidden;
+	}
+
+	.image-wrapper img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+	}
+
+	.featured-card:hover .image-wrapper img {
+		transform: scale(1.1);
+	}
+
+	.featured-card .content {
+		padding: 60px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		background: linear-gradient(to right, #0d0d0d, transparent);
+	}
+
+	.meta {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		font-weight: 600;
+		margin-bottom: 1.5rem;
+	}
+
+	.tag {
+		color: #fff;
+		padding: 4px 10px;
+		background: #1a1a1a;
+		border-radius: 4px;
+		font-size: 0.7rem;
+	}
+
+	.featured-card h3 {
+		font-size: 2.5rem;
+		margin-bottom: 1.5rem;
+		line-height: 1.1;
+	}
+
+	.featured-card p {
+		color: var(--text-muted);
+		margin-bottom: 3rem;
+		font-size: 1.1rem;
+		line-height: 1.7;
+	}
+
+	.read-more {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		font-weight: 800;
+		font-size: 0.9rem;
+		color: #fff;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		transition: gap 0.3s ease;
+	}
+
+	.featured-card:hover .read-more {
+		gap: 20px;
+		color: var(--accent);
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: 1.8fr 1fr;
+		gap: 80px;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 2rem;
+	}
+
+	.posts-list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.post-item a {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 24px 0;
+		border-bottom: 1px solid var(--border);
+		transition: all 0.3s ease;
+	}
+
+	.post-item:hover a {
+		padding-left: 20px;
+		border-color: var(--accent);
+	}
+
+	.post-item h4 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		transition: all 0.3s ease;
+	}
+
+	.post-arrow {
+		opacity: 0;
+		transform: translateX(-20px);
+		transition: all 0.3s ease;
+		color: var(--accent);
+	}
+
+	.post-item:hover .post-arrow {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	.category-tag {
+		background: #0d0d0d;
+		border: 1px solid var(--border);
+		padding: 12px 20px;
+		border-radius: 12px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--text-muted);
+		transition: all 0.3s ease;
+	}
+
+	.category-tag:hover {
+		border-color: var(--accent);
+		color: #fff;
+		transform: translateY(-4px);
+		box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+	}
+
+	@media (max-width: 1000px) {
+		.featured-card {
+			grid-template-columns: 1fr;
+		}
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.featured-card .content {
+			padding: 40px;
+		}
+	}
+</style>

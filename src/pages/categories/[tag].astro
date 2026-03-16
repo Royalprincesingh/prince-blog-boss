@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+export async function getStaticPaths() {
+	const allPosts = await getCollection('blog');
+	const uniqueTags = [...new Set(allPosts.flatMap((post) => post.data.tags || []))];
+
+	return uniqueTags.map((tag) => {
+		const filteredPosts = allPosts.filter((post) => (post.data.tags || []).includes(tag));
+		return {
+			params: { tag: tag.toLowerCase().replace(' ', '-') },
+			props: { posts: filteredPosts, tagName: tag },
+		};
+	});
+}
+
+const { tagName, posts } = Astro.props;
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const title = `Category: ${tagName}`;
+const description = `All articles related to ${tagName}.`;
+---
+
+<BaseLayout title={title} description={description}>
+	<section class="category-header">
+		<a href="/categories" class="back-link">← All Categories</a>
+		<h1>Category: <span class="text-accent">{tagName}</span></h1>
+		<p>{sortedPosts.length} articles found</p>
+	</section>
+
+	<div class="posts-list">
+		{sortedPosts.map((post) => (
+			<article class="post-card">
+				<a href={`/blog/${post.id.replace(/\.[^/.]+$/, "")}/`}>
+					<div class="meta">
+						<FormattedDate date={post.data.pubDate} />
+					</div>
+					<h3>{post.data.title}</h3>
+					<p>{post.data.description}</p>
+				</a>
+			</article>
+		))}
+	</div>
+</BaseLayout>
+
+<style>
+	.category-header {
+		margin-bottom: 60px;
+	}
+
+	.back-link {
+		display: inline-block;
+		margin-bottom: 20px;
+		font-size: 0.9rem;
+		color: var(--text-muted);
+	}
+
+	.text-accent {
+		color: var(--accent);
+	}
+
+	.posts-list {
+		display: flex;
+		flex-direction: column;
+		gap: 32px;
+	}
+
+	.post-card {
+		padding: 32px;
+		background: var(--bg-card);
+		border: 1px solid var(--border);
+		border-radius: 20px;
+		transition: all 0.2s ease;
+	}
+
+	.post-card:hover {
+		border-color: var(--accent);
+		transform: translateX(8px);
+	}
+
+	.post-card h3 {
+		margin-bottom: 12px;
+		font-size: 1.5rem;
+	}
+
+	.post-card p {
+		color: var(--text-muted);
+		font-size: 1rem;
+	}
+
+	.meta {
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		margin-bottom: 8px;
+	}
+</style>

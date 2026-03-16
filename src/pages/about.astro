@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { AUTHOR_NAME } from '../consts';
+
+const title = "About Me";
+const description = "Learn more about Prince Singh and the mission behind this blog.";
+---
+
+<BaseLayout title={title} description={description}>
+	<section class="about-hero">
+		<h1>The Story Behind <br /><span class="text-accent">Prince Singh Blog</span></h1>
+		<p class="subtitle">Empowering developers with knowledge and tools for the modern web.</p>
+	</section>
+
+	<div class="prose">
+		<p>
+			Hello! I'm <strong>{AUTHOR_NAME}</strong>, a MERN Stack Developer with a passion for building elegant solutions to complex problems. 
+			I started this blog as a way to document my journey in the tech world and to share the lessons I've learned along the way.
+		</p>
+
+		<h2>Our Mission</h2>
+		<p>
+			The goal of this blog is to provide high-quality, easy-to-understand tutorials and insights on web development, 
+			specifically focusing on the MERN stack (MongoDB, Express.js, React, Node.js), JavaScript, and the rapidly evolving field of AI tools for developers.
+		</p>
+
+		<h2>What to Expect</h2>
+		<ul>
+			<li><strong>In-depth Tutorials:</strong> Step-by-step guides on building real-world applications.</li>
+			<li><strong>Tech Reviews:</strong> Unbiased reviews of the latest AI tools and developer frameworks.</li>
+			<li><strong>Best Practices:</strong> Practical advice on writing clean, scalable, and maintainable code.</li>
+			<li><strong>Career Advice:</strong> Tips on navigating the tech industry as a developer.</li>
+		</ul>
+
+		<p>
+			Whether you're a seasoned developer or just starting out, I hope you find something valuable here. 
+			Feel free to reach out to me through the <a href="/contact">contact page</a> if you have any questions or just want to say hi!
+		</p>
+	</div>
+</BaseLayout>
+
+<style>
+	.about-hero {
+		padding: 60px 0;
+		text-align: center;
+		border-bottom: 1px solid var(--border);
+		margin-bottom: 60px;
+	}
+
+	.about-hero h1 {
+		margin-bottom: 1rem;
+	}
+
+	.text-accent {
+		color: var(--accent);
+	}
+
+	.subtitle {
+		color: var(--text-muted);
+		font-size: 1.25rem;
+	}
+
+	.prose {
+		max-width: 700px;
+		margin: 0 auto;
+	}
+</style>
