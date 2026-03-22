@@ -1,0 +1,424 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ChevronLeft, Save, Eye, Image as ImageIcon, Sparkles } from 'lucide-astro';
+---
+
+<BaseLayout title="New Post | Blog Boss">
+	<!-- Quill Snow Styles -->
+	<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+	
+	<div class="admin-shell">
+		<aside class="sidebar glass">
+			<a href="/admin/dashboard" class="back-link">
+				<ChevronLeft size={18} />
+				Back to Dashboard
+			</a>
+			
+			<div class="editor-settings">
+				<h3>GitHub Integration</h3>
+				<div class="input-group">
+					<label>GitHub Personal Access Token</label>
+					<input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" />
+					<p class="hint">Stored only in your browser.</p>
+				</div>
+				<div class="input-group">
+					<label>Repository (Owner/Name)</label>
+					<input type="text" id="gh-repo" value="Royalprincesingh/prince-blog-boss" />
+				</div>
+				
+				<h3>Post Settings</h3>
+				<div class="input-group">
+					<label>Hero Image URL</label>
+					<input type="text" id="hero-image" placeholder="https://unsplash.com/..." />
+				</div>
+				<div class="input-group">
+					<label>Tags (comma separated)</label>
+					<input type="text" id="tags" placeholder="tutorial, mern, ai" />
+				</div>
+				<div class="input-group">
+					<label>Publish Date</label>
+					<input type="date" id="pub-date" />
+				</div>
+			</div>
+
+			<div class="actions">
+				<button class="btn-primary" id="publish-btn">
+					<Sparkles size={18} />
+					Publish to GitHub
+				</button>
+				<button class="btn-secondary" id="preview-btn">
+					<Eye size={18} />
+					Preview Markdown
+				</button>
+			</div>
+		</aside>
+
+		<main class="editor-container">
+			<div class="editor-header glass">
+				<input type="text" id="post-title" class="title-input" placeholder="Enter post title here..." />
+				<textarea id="post-desc" class="desc-input" placeholder="Short description for SEO..."></textarea>
+			</div>
+			
+			<div class="rich-editor-wrapper glass">
+				<div id="editor"></div>
+			</div>
+		</main>
+	</div>
+
+	<!-- Modal for Markdown result -->
+	<div id="result-modal" class="modal">
+		<div class="modal-content glass">
+			<header>
+				<h2 id="modal-title">🚀 Post Ready!</h2>
+				<button class="close-btn">&times;</button>
+			</header>
+			<div id="modal-body">
+				<p>Copy this content into a new file in <code>src/content/blog/post-name.md</code></p>
+				<pre id="markdown-result"></pre>
+				<button class="btn-primary" id="copy-btn">Copy to Clipboard</button>
+			</div>
+		</div>
+	</div>
+</BaseLayout>
+
+<script is:inline src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script is:inline>
+	// Simple auth check
+	if (localStorage.getItem('blog-boss-admin') !== 'true') {
+		window.location.href = '/admin';
+	}
+
+	// Persistent settings
+	const ghTokenInput = document.getElementById('gh-token');
+	const ghRepoInput = document.getElementById('gh-repo');
+	
+	ghTokenInput.value = localStorage.getItem('gh-token') || '';
+	ghRepoInput.value = localStorage.getItem('gh-repo') || 'Royalprincesingh/prince-blog-boss';
+
+	// Initialize Quill
+	const quill = new Quill('#editor', {
+		theme: 'snow',
+		modules: {
+			toolbar: [
+				[{ 'header': [1, 2, 3, false] }],
+				['bold', 'italic', 'underline', 'strike'],
+				['blockquote', 'code-block'],
+				[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+				['link', 'image'],
+				['clean']
+			]
+		}
+	});
+
+	// Default date
+	document.getElementById('pub-date').valueAsDate = new Date();
+
+	const modal = document.getElementById('result-modal');
+	const closeBtn = document.querySelector('.close-btn');
+
+	async function publishToGitHub() {
+		const title = document.getElementById('post-title').value;
+		const desc = document.getElementById('post-desc').value;
+		const hero = document.getElementById('hero-image').value || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085';
+		const tags = document.getElementById('tags').value || 'blog';
+		const date = document.getElementById('pub-date').value;
+		const token = ghTokenInput.value;
+		const repo = ghRepoInput.value;
+
+		if (!title || !token || !repo) {
+			alert('Title, Token, and Repo are mandatory!');
+			return;
+		}
+
+		// Save settings
+		localStorage.setItem('gh-token', token);
+		localStorage.setItem('gh-repo', repo);
+
+		const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+		const fileName = `${slug}.md`;
+		const path = `src/content/blog/${fileName}`;
+		
+		const tagList = tags.split(',').map(t => `'${t.trim()}'`).join(', ');
+		const markdown = `---
+title: '${title}'
+description: '${desc}'
+pubDate: '${date}'
+heroImage: '${hero}'
+tags: [${tagList}]
+---
+
+${quill.root.innerHTML}
+`;
+
+		const publishBtn = document.getElementById('publish-btn');
+		const originalText = publishBtn.innerHTML;
+		publishBtn.textContent = 'Publishing...';
+		publishBtn.disabled = true;
+
+		try {
+			const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+				method: 'PUT',
+				headers: {
+					'Authorization': `token ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					message: `Post: ${title}`,
+					content: btoa(unescape(encodeURIComponent(markdown))),
+				})
+			});
+
+			if (response.ok) {
+				alert('🚀 Success! Post pushed to GitHub. Deployment will start automatically.');
+				window.location.href = '/admin/dashboard';
+			} else {
+				const error = await response.json();
+				alert(`Failed: ${error.message}`);
+			}
+		} catch (err) {
+			alert(`Error: ${err.message}`);
+		} finally {
+			publishBtn.innerHTML = originalText;
+			publishBtn.disabled = false;
+		}
+	}
+
+	document.getElementById('publish-btn')?.addEventListener('click', publishToGitHub);
+
+	document.getElementById('preview-btn')?.addEventListener('click', () => {
+		const title = document.getElementById('post-title').value || 'Untitled Post';
+		const desc = document.getElementById('post-desc').value || 'No description';
+		const hero = document.getElementById('hero-image').value || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085';
+		const tags = document.getElementById('tags').value || 'blog';
+		const date = document.getElementById('pub-date').value || new Date().toISOString().split('T')[0];
+		
+		const tagList = tags.split(',').map(t => `'${t.trim()}'`).join(', ');
+		const markdown = `---
+title: '${title}'
+description: '${desc}'
+pubDate: '${date}'
+heroImage: '${hero}'
+tags: [${tagList}]
+---
+
+${quill.root.innerHTML}
+`;
+
+		document.getElementById('markdown-result').textContent = markdown;
+		modal?.classList.add('active');
+	});
+
+	closeBtn?.addEventListener('click', () => modal?.classList.remove('active'));
+	
+	document.getElementById('copy-btn')?.addEventListener('click', () => {
+		const text = document.getElementById('markdown-result')?.textContent || '';
+		navigator.clipboard.writeText(text);
+		alert('Copied to clipboard!');
+	});
+</script>
+
+<style>
+	.admin-shell {
+		display: flex;
+		min-height: 90vh;
+		gap: 2rem;
+		padding: 2rem;
+	}
+
+	.sidebar {
+		width: 320px;
+		border-radius: 24px;
+		display: flex;
+		flex-direction: column;
+		padding: 2rem;
+		height: fit-content;
+		position: sticky;
+		top: 100px;
+		gap: 2rem;
+	}
+
+	.back-link {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 0.9rem;
+	}
+
+	.back-link:hover {
+		color: #fff;
+	}
+
+	.editor-settings h3 {
+		font-size: 1rem;
+		margin-bottom: 1.5rem;
+		color: #fff;
+	}
+
+	.input-group {
+		margin-bottom: 1.2rem;
+	}
+
+	label {
+		display: block;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		margin-bottom: 0.5rem;
+	}
+
+	input[type="text"], input[type="date"], textarea {
+		width: 100%;
+		padding: 0.8rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		color: #fff;
+		font-size: 0.9rem;
+	}
+
+	.actions {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.btn-primary, .btn-secondary {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 1rem;
+		border-radius: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		border: none;
+		transition: all 0.3s ease;
+	}
+
+	.btn-primary {
+		background: var(--accent);
+		color: #fff;
+	}
+
+	.btn-secondary {
+		background: rgba(255, 255, 255, 0.05);
+		color: #fff;
+		border: 1px solid var(--border);
+	}
+
+	.editor-container {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.editor-header {
+		padding: 2rem;
+		border-radius: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.title-input {
+		background: none;
+		border: none;
+		font-size: 2.5rem;
+		font-weight: 800;
+		color: #fff;
+		width: 100%;
+		outline: none;
+	}
+
+	.desc-input {
+		background: none;
+		border: none;
+		font-size: 1.1rem;
+		color: var(--text-muted);
+		width: 100%;
+		resize: none;
+		height: 60px;
+		outline: none;
+	}
+
+	.rich-editor-wrapper {
+		flex: 1;
+		border-radius: 20px;
+		overflow: hidden;
+		background: rgba(10, 10, 10, 0.4);
+	}
+
+	#editor {
+		height: 500px;
+		border: none !important;
+		color: #fff;
+		font-size: 1.1rem;
+	}
+
+	/* Modal Styles */
+	.modal {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.8);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		pointer-events: none;
+		transition: all 0.3s ease;
+		z-index: 1000;
+	}
+
+	.modal.active {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.modal-content {
+		width: 90%;
+		max-width: 600px;
+		padding: 3rem;
+		border-radius: 24px;
+	}
+
+	.modal-content header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 2rem;
+	}
+
+	pre {
+		background: #000;
+		padding: 1.5rem;
+		border-radius: 12px;
+		overflow-x: auto;
+		font-size: 0.9rem;
+		color: #10b981;
+		margin: 1.5rem 0;
+		max-height: 300px;
+	}
+
+	.close-btn {
+		background: none;
+		border: none;
+		color: #fff;
+		font-size: 2rem;
+		cursor: pointer;
+	}
+
+	@media (max-width: 1024px) {
+		.admin-shell {
+			flex-direction: column;
+		}
+		.sidebar {
+			width: 100%;
+			position: static;
+		}
+	}
+</style>

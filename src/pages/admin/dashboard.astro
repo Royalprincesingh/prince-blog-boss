@@ -1,0 +1,301 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Plus, BookOpen, Settings, LogOut, FileText, Image as ImageIcon } from 'lucide-astro';
+---
+
+<BaseLayout title="Admin Dashboard | Blog Boss">
+	<div class="admin-shell">
+		<aside class="sidebar glass">
+			<div class="sidebar-header">
+				<div class="logo">BLOG-BOSS<span class="dot">.</span></div>
+			</div>
+			
+			<nav class="sidebar-nav">
+				<a href="/admin/dashboard" class="nav-item active">
+					<BookOpen size={20} />
+					<span>Dashboard</span>
+				</a>
+				<a href="/admin/new" class="nav-item">
+					<Plus size={20} />
+					<span>New Post</span>
+				</a>
+				<a href="#" class="nav-item">
+					<FileText size={20} />
+					<span>Drafts</span>
+				</a>
+				<a href="#" class="nav-item">
+					<ImageIcon size={20} />
+					<span>Media</span>
+				</a>
+				<div class="spacer"></div>
+				<a href="#" class="nav-item" id="logout-btn">
+					<LogOut size={20} />
+					<span>Logout</span>
+				</a>
+			</nav>
+		</aside>
+
+		<main class="admin-content">
+			<header class="content-header">
+				<h1>Welcome Back, <span class="text-accent">Prince</span>!</h1>
+				<a href="/admin/new" class="btn-primary">
+					<Plus size={18} />
+					Create New Post
+				</a>
+			</header>
+
+			<div class="stats-grid">
+				<div class="stat-card glass">
+					<h3>Total Posts</h3>
+					<p class="stat-value">12</p>
+				</div>
+				<div class="stat-card glass">
+					<h3>Views</h3>
+					<p class="stat-value">1.2k</p>
+				</div>
+				<div class="stat-card glass">
+					<h3>Comments</h3>
+					<p class="stat-value">24</p>
+				</div>
+			</div>
+
+			<section class="recent-posts">
+				<div class="section-header">
+					<h2>Recent Posts</h2>
+					<a href="/blog" class="link">View all</a>
+				</div>
+				
+				<div class="table-container glass">
+					<table class="posts-table">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Date</th>
+								<th>Status</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Modern MERN Stack in 2024</td>
+								<td>Oct 20, 2024</td>
+								<td><span class="badge published">Published</span></td>
+								<td>
+									<button class="btn-icon">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>AI Tools for Developers</td>
+								<td>Oct 15, 2024</td>
+								<td><span class="badge published">Published</span></td>
+								<td>
+									<button class="btn-icon">Edit</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</main>
+	</div>
+</BaseLayout>
+
+<script is:inline>
+	// Simple auth check
+	if (localStorage.getItem('blog-boss-admin') !== 'true') {
+		window.location.href = '/admin';
+	}
+
+	document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+		e.preventDefault();
+		localStorage.removeItem('blog-boss-admin');
+		window.location.href = '/admin';
+	});
+</script>
+
+<style>
+	.admin-shell {
+		display: flex;
+		min-height: 80vh;
+		gap: 2rem;
+		padding: 2rem;
+	}
+
+	.sidebar {
+		width: 260px;
+		border-radius: 24px;
+		display: flex;
+		flex-direction: column;
+		padding: 2rem 1rem;
+		height: fit-content;
+		position: sticky;
+		top: 100px;
+	}
+
+	.sidebar-header {
+		padding: 0 1rem 2rem;
+		border-bottom: 1px solid var(--border);
+		margin-bottom: 1rem;
+	}
+
+	.logo {
+		font-family: var(--font-title);
+		font-size: 1.5rem;
+		font-weight: 800;
+		color: #fff;
+	}
+
+	.dot {
+		color: var(--accent);
+	}
+
+	.sidebar-nav {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		flex: 1;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.8rem 1rem;
+		border-radius: 12px;
+		color: var(--text-muted);
+		text-decoration: none;
+		transition: all 0.3s ease;
+	}
+
+	.nav-item:hover, .nav-item.active {
+		background: rgba(255, 255, 255, 0.05);
+		color: #fff;
+	}
+
+	.nav-item.active {
+		border-left: 3px solid var(--accent);
+		background: rgba(139, 92, 246, 0.1);
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.admin-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+	}
+
+	.content-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	h1 {
+		font-size: 2rem;
+	}
+
+	.btn-primary {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.8rem 1.5rem;
+		background: var(--accent);
+		color: #fff;
+		border-radius: 12px;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.5rem;
+	}
+
+	.stat-card {
+		padding: 2rem;
+		border-radius: 20px;
+		text-align: center;
+	}
+
+	.stat-card h3 {
+		font-size: 0.9rem;
+		color: var(--text-muted);
+		margin-bottom: 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.stat-value {
+		font-size: 2.5rem;
+		font-weight: 800;
+		color: #fff;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+	}
+
+	.table-container {
+		border-radius: 20px;
+		overflow: hidden;
+	}
+
+	.posts-table {
+		width: 100%;
+		border-collapse: collapse;
+		text-align: left;
+	}
+
+	.posts-table th {
+		padding: 1.2rem;
+		background: rgba(255, 255, 255, 0.02);
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		font-weight: 600;
+	}
+
+	.posts-table td {
+		padding: 1.2rem;
+		border-top: 1px solid var(--border);
+		font-size: 0.95rem;
+	}
+
+	.badge {
+		padding: 0.3rem 0.8rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+
+	.badge.published {
+		background: rgba(16, 185, 129, 0.1);
+		color: #10b981;
+	}
+
+	.btn-icon {
+		padding: 0.4rem 1rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	@media (max-width: 1024px) {
+		.admin-shell {
+			flex-direction: column;
+		}
+		.sidebar {
+			width: 100%;
+			position: static;
+		}
+	}
+</style>
